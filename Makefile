@@ -23,6 +23,7 @@ slither :; @$(MAKE) -C packages/$(target) slither
 # Format
 format :; @prettier --write packages/$(target)/src/**/*.sol && prettier --write packages/$(target)/src/**/**/*.sol
 
+coverage :; @$(MAKE) -C packages/$(target) coverage
 # solhint should be installed globally
 lint :; @solhint packages/$(target)/src/**/*.sol && solhint packages/$(target)/src/*.sol
 

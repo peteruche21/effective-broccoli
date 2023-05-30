@@ -5,3 +5,4 @@ forge-std/=lib/forge-std/src/
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 @aa/=lib/account-abstraction/
 @usernames/=src/
+mocks/=test/mocks/

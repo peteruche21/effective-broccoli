@@ -17,7 +17,7 @@ install :; pre_install run_install post_install
 
 pre_install :; @touch .gitmodules
 
-run_install :; @forge install foundry-rs/forge-std smartcontractkit/chainlink-brownie-contracts openzeppelin/openzeppelin-contracts openzeppelin/openzeppelin-contracts-upgradeable --no-commit
+run_install :; @forge install foundry-rs/forge-std smartcontractkit/chainlink-brownie-contracts openzeppelin/openzeppelin-contracts openzeppelin/openzeppelin-contracts-upgradeable eth-infinitism/account-abstraction --no-commit
 
 post_install :; @rm .gitmodules
 
@@ -27,9 +27,9 @@ update:; @forge update
 # Build the project
 build:; @forge build --build-info --sizes
 
-test :; @forge test --gas-report
+test :; @forge test --gas-report -vvv
 
-coverage :; @forge coverage
+coverage :; @forge coverage -vv
 
 snapshot :; @forge snapshot
 

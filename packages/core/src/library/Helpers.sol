@@ -71,7 +71,8 @@ library Helpers {
         return providedAllowance;
     }
 
-    function extractECDSASignature(
+    // extracts multisig signature
+    function extractECDSASignatures(
         bytes memory _fullSignature
     ) public pure returns (bytes memory signature1, bytes memory signature2) {
         signature1 = new bytes(_fullSignature.length / 2);
@@ -98,6 +99,20 @@ library Helpers {
             mstore(add(signature2, 0x20), r)
             mstore(add(signature2, 0x40), s)
             mstore8(add(signature2, 0x60), v)
+        }
+    }
+
+    // extracts single ECDSA signature
+    function extractECDSASignature(bytes memory _partialSignature) public pure returns (bytes memory signature) {
+        signature = new bytes(_partialSignature.length);
+        assembly {
+            let r := mload(add(_partialSignature, 0x20))
+            let s := mload(add(_partialSignature, 0x40))
+            let v := and(mload(add(_partialSignature, 0x41)), 0xff)
+
+            mstore(add(signature, 0x20), r)
+            mstore(add(signature, 0x40), s)
+            mstore8(add(signature, 0x60), v)
         }
     }
 
