@@ -21,8 +21,8 @@
 
 [Build](#build) •
 [Test](#test) •
-[Report a bug](https://github.com/peteruche21/effective-broccoli/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+)
-• [Questions](https://www.newton.so/?tags=effective-brocolli)
+[Report a bug](https://github.com/peteruche21/effective-broccoli/issues/new)
+• [Questions](https://github.com/peteruche21/effective-broccoli/)
 
 </div>
 
