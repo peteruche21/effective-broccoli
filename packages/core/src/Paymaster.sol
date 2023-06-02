@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.19;
 
 import "@aa/contracts/core/BasePaymaster.sol";
 import "@usernames/security/Guard.sol";
@@ -14,7 +14,7 @@ contract UsernamesPaymaster is BasePaymaster, Guard {
 
     mapping(address => uint256) public senderNonce;
 
-    constructor(IEntryPoint _entryPoint) BasePaymaster(_entryPoint) {}
+    constructor(IEntryPoint _entryPoint, address owner) BasePaymaster(_entryPoint) Ownable(owner) {}
 
     function pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {
         // lighter signature scheme. must match UserOp.ts#packUserOp

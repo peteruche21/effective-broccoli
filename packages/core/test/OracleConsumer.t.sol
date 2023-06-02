@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import {MockV3Aggregator} from "mocks/MocksAndContracts.t.sol";
@@ -36,12 +36,19 @@ contract OracleConsumerTest is Test {
 
     function testConsumerDerivesPrice() public {
         // 0.1^18 eth == 0.1^9 link (1:1)
-        int256 price = address(mockV3AggregatorBase).getDerivedPrice(address(mockV3AggregatorQuote), .1e18);
+        int256 price = address(mockV3AggregatorBase).getDerivedPrice(
+            address(mockV3AggregatorQuote),
+            .1e18
+        );
         assertTrue(price == 1e8);
     }
 
     function testConsumerDerivesPriceGlobal() public {
-        int256 price = tokenToPriceFeed.getDerivedPrice(testTokenA, tokenToPriceFeed[testTokenB], .1e18);
+        int256 price = tokenToPriceFeed.getDerivedPrice(
+            testTokenA,
+            tokenToPriceFeed[testTokenB],
+            .1e18
+        );
         assertTrue(price == 1e8);
     }
 

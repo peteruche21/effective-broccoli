@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.19;
 
 import "@ens/contracts/registry/ENS.sol";
 import "@ens/contracts/reverseRegistrar/IReverseRegistrar.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@ens/contracts/root/Controllable.sol";
 
 abstract contract NameResolver {
@@ -14,14 +13,14 @@ bytes32 constant lookup = 0x3031323334353637383961626364656600000000000000000000
 
 bytes32 constant ADDR_REVERSE_NODE = 0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;
 
-contract ReverseRegistrar is Ownable, Controllable, IReverseRegistrar {
+contract ReverseRegistrar is Controllable, IReverseRegistrar {
     ENS public immutable ens;
     NameResolver public defaultResolver;
 
     event ReverseClaimed(address indexed addr, bytes32 indexed node);
     event DefaultResolverChanged(NameResolver indexed resolver);
 
-    constructor(ENS ensAddr) {
+    constructor(ENS ensAddr, address _owner) Ownable(_owner) {
         ens = ensAddr;
 
         // Assign ownership of the reverse record to our deployer
@@ -36,7 +35,7 @@ contract ReverseRegistrar is Ownable, Controllable, IReverseRegistrar {
             addr == msg.sender ||
                 controllers[msg.sender] ||
                 ens.isApprovedForAll(addr, msg.sender) ||
-                ownsContract(addr),
+                msg.sender == owner(),
             "ReverseRegistrar: Caller is not a controller or authorised by address or the address itself"
         );
         _;
@@ -51,24 +50,24 @@ contract ReverseRegistrar is Ownable, Controllable, IReverseRegistrar {
         emit DefaultResolverChanged(NameResolver(resolver));
     }
 
-    function claim(address owner) public override returns (bytes32) {
-        return claimForAddr(msg.sender, owner, address(defaultResolver));
+    function claim(address _owner) public override returns (bytes32) {
+        return claimForAddr(msg.sender, _owner, address(defaultResolver));
     }
 
     function claimForAddr(
         address addr,
-        address owner,
+        address _owner,
         address resolver
     ) public override authorised(addr) returns (bytes32) {
         bytes32 labelHash = sha3HexAddress(addr);
         bytes32 reverseNode = keccak256(abi.encodePacked(ADDR_REVERSE_NODE, labelHash));
         emit ReverseClaimed(addr, reverseNode);
-        ens.setSubnodeRecord(ADDR_REVERSE_NODE, labelHash, owner, resolver, 0);
+        ens.setSubnodeRecord(ADDR_REVERSE_NODE, labelHash, _owner, resolver, 0);
         return reverseNode;
     }
 
-    function claimWithResolver(address owner, address resolver) public override returns (bytes32) {
-        return claimForAddr(msg.sender, owner, resolver);
+    function claimWithResolver(address _owner, address resolver) public override returns (bytes32) {
+        return claimForAddr(msg.sender, _owner, resolver);
     }
 
     function setName(string memory name) public override returns (bytes32) {
@@ -77,11 +76,11 @@ contract ReverseRegistrar is Ownable, Controllable, IReverseRegistrar {
 
     function setNameForAddr(
         address addr,
-        address owner,
+        address _owner,
         address resolver,
         string memory name
     ) public override returns (bytes32) {
-        bytes32 _node = claimForAddr(addr, owner, resolver);
+        bytes32 _node = claimForAddr(addr, _owner, resolver);
         NameResolver(resolver).setName(_node, name);
         return _node;
     }
@@ -106,14 +105,6 @@ contract ReverseRegistrar is Ownable, Controllable, IReverseRegistrar {
             }
 
             ret := keccak256(0, 40)
-        }
-    }
-
-    function ownsContract(address addr) internal view returns (bool) {
-        try Ownable(addr).owner() returns (address owner) {
-            return owner == msg.sender;
-        } catch {
-            return false;
         }
     }
 }
