@@ -9,6 +9,8 @@
         "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
         "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
         "@aa/=lib/account-abstraction/",
-        "@usernames/=src/"
+        "@usernames/=src/",
+        "mocks/=test/mocks/",
+        "@ens/contracts/=lib/ens-contracts/contracts/"
     ]
 }

@@ -19,7 +19,10 @@ library Helpers {
     /// @param _payload - the the encoded function signature in bytes
     /// @param _to - the contract address to send external call.
     /// @return - (uint256)
-    function externalStaticcall(bytes calldata _payload, address _to) public view returns (uint256) {
+    function externalStaticcall(
+        bytes calldata _payload,
+        address _to
+    ) public view returns (uint256) {
         (bool success, bytes memory returnData) = _to.staticcall(_payload);
         if (success) {
             return abi.decode(returnData, (uint256));
@@ -45,7 +48,10 @@ library Helpers {
     /// @param _payload - the the encoded function signature in bytes
     /// @param _to - the contract address to delegate call to.
     /// @return - (bytes)
-    function externalDelegateCall(bytes calldata _payload, address _to) public returns (bytes memory) {
+    function externalDelegateCall(
+        bytes calldata _payload,
+        address _to
+    ) public returns (bytes memory) {
         (bool success, bytes memory returnData) = _to.delegatecall(_payload);
         if (success) {
             return returnData;
@@ -103,7 +109,9 @@ library Helpers {
     }
 
     // extracts single ECDSA signature
-    function extractECDSASignature(bytes memory _partialSignature) public pure returns (bytes memory signature) {
+    function extractECDSASignature(
+        bytes memory _partialSignature
+    ) public pure returns (bytes memory signature) {
         signature = new bytes(_partialSignature.length);
         assembly {
             let r := mload(add(_partialSignature, 0x20))
@@ -120,7 +128,10 @@ library Helpers {
     /// because only a sibling paymaster can delegate its userOp to another sibling
     /// @param delegateNamehash the subdomain namehash that is originally meant to pay the gas fee
     /// @return  - true / false
-    function useDelegate(bytes32[] memory self, bytes32 delegateNamehash) public pure returns (bool) {
+    function useDelegate(
+        bytes32[] memory self,
+        bytes32 delegateNamehash
+    ) public pure returns (bool) {
         for (uint256 i = 0; i < self.length; i++) {
             if (delegateNamehash == self[i]) return true;
         }
@@ -131,7 +142,10 @@ library Helpers {
      * @dev checks that this paymaster can sponsor gas on behalf of another paymaster
      * @param destNamehash originally intended paymaster
      */
-    function previewDelegation(bytes32[] storage siblings, bytes32 destNamehash) public pure returns (bool truthy) {
+    function previewDelegation(
+        bytes32[] storage siblings,
+        bytes32 destNamehash
+    ) public pure returns (bool truthy) {
         truthy = true; // true & true = true, true & false = false, false & false = false.
         // currently, the validator must be the same for the two core for delegation to work.
         truthy = truthy && useDelegate(siblings, destNamehash);

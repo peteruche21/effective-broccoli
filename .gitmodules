@@ -13,3 +13,6 @@
 [submodule "packages/core/lib/account-abstraction"]
 	path = packages/core/lib/account-abstraction
 	url = https://github.com/eth-infinitism/account-abstraction
+[submodule "packages/core/lib/ens-contracts"]
+	path = packages/core/lib/ens-contracts
+	url = https://github.com/ensdomains/ens-contracts

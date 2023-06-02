@@ -5,9 +5,14 @@
     "main": "index.js",
     "private": true,
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "make test"
     },
-    "keywords": [],
+    "keywords": [
+        "web3 usernames",
+        "ens",
+        "paymaster",
+        "ERC721+ERC4337+ERC147"
+    ],
     "author": "",
     "license": "ISC",
     "dependencies": {

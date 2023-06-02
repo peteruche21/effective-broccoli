@@ -19,7 +19,11 @@ library PriceFeedConsumer {
     }
 
     // price derivation method, accepting custom quote
-    function getDerivedPrice(address _base, address _quote, int256 amount) public view returns (int256) {
+    function getDerivedPrice(
+        address _base,
+        address _quote,
+        int256 amount
+    ) public view returns (int256) {
         (, int256 basePrice, , , ) = AggregatorV3Interface(_base).latestRoundData();
         uint8 baseDecimals = AggregatorV3Interface(_base).decimals();
 
@@ -33,7 +37,11 @@ library PriceFeedConsumer {
     }
 
     // harmonize differences in quotes decimals
-    function _scalePrice(int256 _price, uint8 _priceDecimals, uint8 _decimals) public pure returns (int256) {
+    function _scalePrice(
+        int256 _price,
+        uint8 _priceDecimals,
+        uint8 _decimals
+    ) public pure returns (int256) {
         if (_priceDecimals < _decimals) {
             return _price * int256(10 ** uint256(_decimals - _priceDecimals));
         } else if (_priceDecimals > _decimals) {
