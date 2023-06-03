@@ -1,11 +1,6 @@
 <p align="center">
-    <img src="./img/logo_normal.jpg">
+    <img src="./img/3.png">
 </p>
-<div align="center">
-  <h1 align="center">
-  Usernames on Mantle
-  </h1>
-</div>
 
 <div align="center">
 
