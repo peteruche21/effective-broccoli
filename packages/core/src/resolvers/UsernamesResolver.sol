@@ -26,12 +26,12 @@ contract UsernamesResolver is Multicallable, AddrResolver, ReverseClaimer {
     constructor(
         ENS _ens,
         INameWrapper wrapperAddress,
-        address _trustedETHController,
+        address _trustedBitController,
         address _trustedReverseRegistrar
     ) ReverseClaimer(_ens, msg.sender) {
         ens = _ens;
         nameWrapper = wrapperAddress;
-        trustedController = _trustedETHController;
+        trustedController = _trustedBitController;
         trustedReverseRegistrar = _trustedReverseRegistrar;
     }
 

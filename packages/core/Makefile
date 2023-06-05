@@ -24,10 +24,10 @@ post_install :; @rm .gitmodules
 # Update Dependencies
 update:; @forge update
 
-build-inner :; @forge build --build-info --sizes
+build-inner :; @make modify-ens-controller build-inner
 
 # Build the project
-build:; @make modify-lib build-inner
+build:; @forge build --build-info --sizes
 
 test :; @forge test --gas-report -vvv
 
@@ -47,4 +47,4 @@ lint :; @solhint src/**/*.sol && solhint src/*.sol
 # Deploy
 deploy :; @forge script script/${contract}.s.sol:Deploy${contract} --rpc-url $${$(CHAIN)_RPC_URL}  --private-key ${PRIVATE_KEY} --broadcast --verify --etherscan-api-key ${ETHERSCAN_API_KEY}  -vv
 
-modify-lib :; @sed -i 's/contract Controllable/abstract contract Controllable/g' lib/ens-contracts/contracts/root/Controllable.sol
+modify-ens-controller :; @sed -i 's/contract Controllable/abstract contract Controllable/g' lib/ens-contracts/contracts/root/Controllable.sol

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 contract TestContract is Test {
@@ -22,7 +22,7 @@ contract TestContract is Test {
         return storedNumber;
     }
 
-    function testIgnoresMocksInCoverage() public {
+    function testIgnoresTestContractInCoverage() public {
         // this method is just to force foundry to exclude this contract from coverage
         // by making it look like test file
         assertTrue(1 == 1);
@@ -71,7 +71,12 @@ contract MockV3Aggregator is Test {
         getStartedAt[latestRound] = block.timestamp;
     }
 
-    function updateRoundData(uint80 _roundId, int256 _answer, uint256 _timestamp, uint256 _startedAt) public {
+    function updateRoundData(
+        uint80 _roundId,
+        int256 _answer,
+        uint256 _timestamp,
+        uint256 _startedAt
+    ) public {
         latestRound = _roundId;
         latestAnswer = _answer;
         latestTimestamp = _timestamp;
@@ -85,15 +90,33 @@ contract MockV3Aggregator is Test {
     )
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
     {
-        return (_roundId, getAnswer[_roundId], getStartedAt[_roundId], getTimestamp[_roundId], _roundId);
+        return (
+            _roundId,
+            getAnswer[_roundId],
+            getStartedAt[_roundId],
+            getTimestamp[_roundId],
+            _roundId
+        );
     }
 
     function latestRoundData()
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
     {
         return (
             uint80(latestRound),
@@ -123,7 +146,8 @@ contract SigUtils is Test {
     }
 
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-    bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+    bytes32 public constant PERMIT_TYPEHASH =
+        0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
     struct Permit {
         address owner;

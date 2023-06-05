@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -7,7 +7,7 @@ import {Helpers} from "@usernames/library/Helpers.sol";
 import {TestContract} from "mocks/MocksAndContracts.t.sol";
 import {ERC20Test, IERC20} from "@usernames/tokens/ERC20.sol";
 
-contract HelpersTest is Test {
+contract HelperLibTest is Test {
     using Helpers for *;
     using ECDSA for bytes32;
 
@@ -136,11 +136,11 @@ contract HelpersTest is Test {
     }
 
     function testPreviewDelegation() public {
-        siblings = [keccak256("uche.bit"), keccak256("kenzy.mnt"), keccak256("ckas.umunwa")];
+        siblings = [keccak256("uche.bit"), keccak256("kenzy.umuasa"), keccak256("ckas.umunwa")];
 
         bool validDelegate1 = siblings.previewDelegation(keccak256("uche.bit"));
         assertTrue(validDelegate1);
-        bool validDelegate2 = siblings.previewDelegation(keccak256("kenzy.mnt"));
+        bool validDelegate2 = siblings.previewDelegation(keccak256("kenzy.umuasa"));
         assertTrue(validDelegate2);
         bool validDelegate3 = siblings.previewDelegation(keccak256("ckas.umunwa"));
         assertTrue(validDelegate3);

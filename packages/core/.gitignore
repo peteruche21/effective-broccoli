@@ -12,3 +12,6 @@ docs/
 
 # Dotenv file
 .env
+
+# ens controller
+lib/ens-contracts/contracts/root/Controllable.sol

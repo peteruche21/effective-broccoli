@@ -6,3 +6,4 @@ error OperationFailed();
 error InsufficientAllowance();
 error NotEnoughValueForGas();
 error FailedToValidatedOp();
+error InsufficientValue();
