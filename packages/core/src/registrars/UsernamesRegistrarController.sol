@@ -149,7 +149,12 @@ contract UsernamesRegistrarController is IERC165, ERC20Recoverable, ReverseClaim
 
     function _setRecords(address resolverAddress, bytes32 label, bytes[] calldata data) internal {
         // use hardcoded .bit namehash
-        bytes32 nodehash = keccak256(abi.encodePacked(bytes32(0x0), label));
+        bytes32 nodehash = keccak256(
+            abi.encodePacked(
+                bytes32(0xfc602f00234da74893ed324e3aa56a3f7fe5cc12557d414fc4e44ab482fe1408),
+                label
+            )
+        );
         UsernamesResolver resolver = UsernamesResolver(resolverAddress);
         resolver.multicallWithNodeCheck(nodehash, data);
     }
