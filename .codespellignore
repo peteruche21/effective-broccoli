@@ -10,3 +10,9 @@ axelar
 delegatecall
 ens
 mantle
+FIFS
+concat
+strlen
+ethregistrar
+isAuthorised
+Multicallable

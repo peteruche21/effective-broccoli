@@ -81,7 +81,7 @@ library Helpers {
     /// @param from - the address of the transaction sender
     /// @param to - (optional) the address of fee receiver or VA
     /// @param amount - amount of tokens to be transferred to fee Receiver
-    /// @param token - conreact address of the ERC20 token
+    /// @param token - contract address of the ERC20 token
     function handleTokenTransfer(address from, address to, uint256 amount, IERC20 token) public {
         SafeERC20.safeTransferFrom(token, from, to, amount);
     }

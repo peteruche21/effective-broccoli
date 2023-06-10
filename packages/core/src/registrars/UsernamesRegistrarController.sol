@@ -122,8 +122,8 @@ contract UsernamesRegistrarController is IERC165, ERC20Recoverable, ReverseClaim
     }
 
     function renew(string calldata name, uint256 duration) external payable {
-        bytes32 labelhash = keccak256(bytes(name));
-        uint256 tokenId = uint256(labelhash);
+        bytes32 labelHash = keccak256(bytes(name));
+        uint256 tokenId = uint256(labelHash);
         Price memory price = rentPrice(name, duration);
         if (msg.value < price.base) {
             revert InsufficientValue();
@@ -134,7 +134,7 @@ contract UsernamesRegistrarController is IERC165, ERC20Recoverable, ReverseClaim
             payable(msg.sender).transfer(msg.value - price.base);
         }
 
-        emit NameRenewed(name, labelhash, price.base, expires);
+        emit NameRenewed(name, labelHash, price.base, expires);
     }
 
     function withdraw() public onlyOwner {
@@ -149,14 +149,14 @@ contract UsernamesRegistrarController is IERC165, ERC20Recoverable, ReverseClaim
 
     function _setRecords(address resolverAddress, bytes32 label, bytes[] calldata data) internal {
         // use hardcoded .bit namehash
-        bytes32 nodehash = keccak256(
+        bytes32 nodeHash = keccak256(
             abi.encodePacked(
                 bytes32(0xfc602f00234da74893ed324e3aa56a3f7fe5cc12557d414fc4e44ab482fe1408),
                 label
             )
         );
         UsernamesResolver resolver = UsernamesResolver(resolverAddress);
-        resolver.multicallWithNodeCheck(nodehash, data);
+        resolver.multicallWithNodeCheck(nodeHash, data);
     }
 
     function _setReverseRecord(string memory name, address resolver, address owner) internal {

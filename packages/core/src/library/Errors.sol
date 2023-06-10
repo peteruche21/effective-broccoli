@@ -8,4 +8,4 @@ error NotEnoughValueForGas();
 error FailedToValidatedOp();
 error InsufficientValue();
 error InvalidSignatureLength();
-error UnAuthorised();
+error UnAuthorized();

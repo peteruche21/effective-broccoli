@@ -19,14 +19,14 @@ contract UsernamesResolver is Multicallable, AddrResolver, NameResolver, Reverse
     address immutable trustedReverseRegistrar;
 
     /**
-     * A mapping of operators. An address that is authorised for an address
+     * A mapping of operators. An address that is authorized for an address
      * may make any changes to the name that the owner could, but may not update
-     * the set of authorisations.
+     * the set of authorizations.
      * (owner, operator) => approved
      */
     mapping(address => mapping(address => bool)) private _operatorApprovals;
     /**
-     * A mapping of delegates. A delegate that is authorised by an owner
+     * A mapping of delegates. A delegate that is authorized by an owner
      * for a name may make changes to the name's resolver, but may not update
      * the set of token approvals.
      * (owner, name, delegate) => approved

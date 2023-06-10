@@ -103,7 +103,7 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
     /**
      * @dev Sets the `name()` record for the reverse ENS record associated with
      * the account provided. Updates the resolver to a designated resolver
-     * Only callable by controllers and authorised users
+     * Only callable by controllers and authorized users
      * @param addr The reverse record to set
      * @param _owner The owner of the reverse node
      * @param resolver The resolver of the reverse node
@@ -131,7 +131,7 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
     }
 
     /**
-     * @dev An optimised function to compute the sha3 of the lower-case
+     * @dev An optimized function to compute the sha3 of the lower-case
      *      hexadecimal representation of an Ethereum address.
      * @param addr The address to hash
      * @return ret The SHA3 hash of the lower-case hexadecimal encoding of the

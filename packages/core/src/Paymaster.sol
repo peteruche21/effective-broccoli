@@ -18,13 +18,13 @@ import "@usernames/registrars/FIFSRegistrar.sol";
 
 /// @title Global Paymaster Registrar
 /// @author Peter Anyaogu
-/// @notice ENS Registrar that registers subdomains for users and also uses namehashes for gas sponsorship
+/// @notice ENS Registrar that registers subdomains for users and also uses name hashes for gas sponsorship
 /// NameHashes: It uses nodes to represent a user's share of the contract balance
 /// all addresses that have a subdomain to a node, can consume the nodes balance for an EIP4337 transaction
 /// A valid signer can sign transaction, but its not strictly required, however, the node config must be set
 /// @dev dual mode paymasters that doubles as:
-/// 1: a verifying paymaster with surpport of 0 to 2FA signature validation
-/// 2: an ERC20 paymaster where the user pays with a surpported token
+/// 1: a verifying paymaster with support of 0 to 2FA signature validation
+/// 2: an ERC20 paymaster where the user pays with a supported token
 /// 3: a global paymaster where anyone can pay gas fees for users
 contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     using ECDSA for bytes32;
@@ -46,8 +46,8 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
 
     mapping(address => mapping(bytes32 => Debt)) public debt;
 
-    modifier isAuthorised(bytes32 node) {
-        if (ens.owner(node) != msg.sender) revert UnAuthorised();
+    modifier isAuthorized(bytes32 node) {
+        if (ens.owner(node) != msg.sender) revert UnAuthorized();
         _;
     }
 
@@ -115,7 +115,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         address secondarySigner,
         bytes32 node,
         uint8 sigCount
-    ) external isAuthorised(node) {
+    ) external isAuthorized(node) {
         if (sigCount > 2) revert InvalidConfig();
         nodeToConfig[node].verifyingSigner1 = primarySigner;
         nodeToConfig[node].verifyingSigner2 = secondarySigner;
@@ -136,7 +136,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     }
 
     /// @dev only a node owner can withdraw balances specific tot he node.
-    function withdraw(bytes32 node) external isAuthorised(node) {
+    function withdraw(bytes32 node) external isAuthorized(node) {
         uint256 balance = nodeToBalance[node];
         nodeToBalance[node] = 0;
         payable(msg.sender).transfer(balance);
@@ -157,9 +157,9 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         if (userOp.paymasterAndData.length - 20 < 116 || userOp.verificationGasLimit < COST_OF_POST)
             revert FailedToValidatedOp();
 
-        // Gets the nodehash from the paymasterAndData
-        // the nodeHash is hash of the TLD of userOp.sender
-        // e.g `alice.usernames.bit` nodehash is nameHash("usernames.bit")
+        // Gets the node from the paymasterAndData
+        // the node is hash of the TLD of userOp.sender
+        // e.g `alice.usernames.bit` node is nameHash("usernames.bit")
         // determining if a subdomain exists for a caller is done off-chain by the signer
         bytes32 nodeHash = bytes32(userOp.paymasterAndData[84:116]);
 
@@ -205,13 +205,13 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
             // assuming 1FA signature validation is used
             if (nodeConfig.verifyingSigner1 == address(0)) revert FailedToValidatedOp();
             address signer = _validateOneSignature(signatures, userOp.sender, hash);
-            // if signature verification fails, return SIG_VALIATION_FAILED but do not revert
+            // if signature verification fails, return SIG_VALIDATION_FAILED but do not revert
             if (signer != nodeConfig.verifyingSigner1 || signer != nodeConfig.verifyingSigner2)
                 validationData = _packValidationData(true, validUntil, validAfter);
         } else if (expectedValidationStep == SigCount.TWO) {
-            // when 2FA is enabled, the 2 signatures must be reprsented in any order
+            // when 2FA is enabled, the 2 signatures must be represented in any order
             // but must correspond to the signers.
-            // also, return SIG_VALIATION_FAILED and do not revert, if sig validation fails
+            // also, return SIG_VALIDATION_FAILED and do not revert, if sig validation fails
             if (
                 nodeConfig.verifyingSigner1 == address(0) ||
                 nodeConfig.verifyingSigner2 == address(0)
@@ -270,8 +270,8 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         signer2 = ECDSA.recover(_hash, signature2);
     }
 
-    /// @notice the post operation does not gurantee that the debt will ever be cleared.
-    /// while its not posible to process another userOp with an existing debt
+    /// @notice the post operation does not guarantee that the debt will ever be cleared.
+    /// while its not possible to process another userOp with an existing debt
     /// it does not stop bad actors from using this paymaster to execute expensive contract calls
     function _postOp(
         PostOpMode mode,
@@ -287,9 +287,9 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         ) = abi.decode(context, (address, IERC20, uint256, uint256, bytes32));
 
         // calculate a token equivalent of the pre-calculated expenses
-        int256 tokencost = _getPriceFromOracle(feeToken, requiredPreFund);
+        int256 tokenCost = _getPriceFromOracle(feeToken, requiredPreFund);
         // calculate the real cost of the operation
-        uint256 realCost = ((actualGasCost + COST_OF_POST * gasPrice) * uint256(tokencost)) /
+        uint256 realCost = ((actualGasCost + COST_OF_POST * gasPrice) * uint256(tokenCost)) /
             requiredPreFund;
 
         if (mode == PostOpMode.postOpReverted) {
