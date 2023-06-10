@@ -38,10 +38,10 @@ jobs:
                   make update target=core
               id: update
 
-            - name: Run modify-ens-controller
+            - name: Run perform-modifications
               run: |
-                  make modify-ens-controller
-              id: modify-ens-controller
+                  make perform-modifications
+              id: perform-modifications
 
             - name: Run Forge build
               run: |

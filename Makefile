@@ -38,4 +38,4 @@ deploy-local :; @forge script packages/$(target)/script/${contract}.s.sol:Deploy
 
 factory-deploy :; @cast send --interactive 1 --rpc-url $${$(CHAIN)_RPC_URL} --json 0xfactoryAddress "deploy(address admin, uint256 _salt, Type paymasterType)" ${admin} ${salt} ${choice}
 
-modify-ens-controller :; @$(MAKE) -C packages/core modify-ens-controller
+perform-modifications :; @$(MAKE) -C packages/core perform-modifications

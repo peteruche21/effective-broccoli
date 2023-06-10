@@ -13,6 +13,7 @@ bytes32 constant lookup = 0x3031323334353637383961626364656600000000000000000000
 
 bytes32 constant ADDR_REVERSE_NODE = 0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;
 
+// namehash('addr.reverse')
 contract ReverseRegistrar is Controllable, IReverseRegistrar {
     ENS public immutable ens;
     NameResolver public defaultResolver;
@@ -20,6 +21,10 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
     event ReverseClaimed(address indexed addr, bytes32 indexed node);
     event DefaultResolverChanged(NameResolver indexed resolver);
 
+    /**
+     * @dev Constructor
+     * @param ensAddr The address of the ENS registry.
+     */
     constructor(ENS ensAddr, address _owner) Ownable(_owner) {
         ens = ensAddr;
 
@@ -35,7 +40,7 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
             addr == msg.sender ||
                 controllers[msg.sender] ||
                 ens.isApprovedForAll(addr, msg.sender) ||
-                msg.sender == owner(),
+                msg.sender == Ownable(addr).owner(),
             "ReverseRegistrar: Caller is not a controller or authorised by address or the address itself"
         );
         _;
@@ -50,10 +55,24 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
         emit DefaultResolverChanged(NameResolver(resolver));
     }
 
+    /**
+     * @dev Transfers ownership of the reverse ENS record associated with the
+     *      calling account.
+     * @param _owner The address to set as the owner of the reverse record in ENS.
+     * @return The ENS node hash of the reverse record.
+     */
     function claim(address _owner) public override returns (bytes32) {
         return claimForAddr(msg.sender, _owner, address(defaultResolver));
     }
 
+    /**
+     * @dev Transfers ownership of the reverse ENS record associated with the
+     *      calling account.
+     * @param addr The reverse record to set
+     * @param _owner The address to set as the owner of the reverse record in ENS.
+     * @param resolver The resolver of the reverse node
+     * @return The ENS node hash of the reverse record.
+     */
     function claimForAddr(
         address addr,
         address _owner,
@@ -70,10 +89,27 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
         return claimForAddr(msg.sender, _owner, resolver);
     }
 
+    /**
+     * @dev Sets the `name()` record for the reverse ENS record associated with
+     * the calling account. First updates the resolver to the default reverse
+     * resolver if necessary.
+     * @param name The name to set for this address.
+     * @return The ENS node hash of the reverse record.
+     */
     function setName(string memory name) public override returns (bytes32) {
         return setNameForAddr(msg.sender, msg.sender, address(defaultResolver), name);
     }
 
+    /**
+     * @dev Sets the `name()` record for the reverse ENS record associated with
+     * the account provided. Updates the resolver to a designated resolver
+     * Only callable by controllers and authorised users
+     * @param addr The reverse record to set
+     * @param _owner The owner of the reverse node
+     * @param resolver The resolver of the reverse node
+     * @param name The name to set for this address.
+     * @return The ENS node hash of the reverse record.
+     */
     function setNameForAddr(
         address addr,
         address _owner,
@@ -85,10 +121,22 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
         return _node;
     }
 
+    /**
+     * @dev Returns the node hash for a given account's reverse records.
+     * @param addr The address to hash
+     * @return The ENS node hash.
+     */
     function node(address addr) public pure override returns (bytes32) {
         return keccak256(abi.encodePacked(ADDR_REVERSE_NODE, sha3HexAddress(addr)));
     }
 
+    /**
+     * @dev An optimised function to compute the sha3 of the lower-case
+     *      hexadecimal representation of an Ethereum address.
+     * @param addr The address to hash
+     * @return ret The SHA3 hash of the lower-case hexadecimal encoding of the
+     *         input address.
+     */
     function sha3HexAddress(address addr) private pure returns (bytes32 ret) {
         assembly {
             for {

@@ -2,20 +2,40 @@
 pragma solidity 0.8.19;
 
 import "@ens/contracts/resolvers/profiles/AddrResolver.sol";
+import "@ens/contracts/resolvers/profiles/NameResolver.sol";
 import "@ens/contracts/registry/ENS.sol";
 import "@ens/contracts/resolvers/Multicallable.sol";
 import {ReverseClaimer} from "@ens/contracts/reverseRegistrar/ReverseClaimer.sol";
 import {INameWrapper} from "@ens/contracts/wrapper/INameWrapper.sol";
 
-contract UsernamesResolver is Multicallable, AddrResolver, ReverseClaimer {
+/**
+ * A simple resolver anyone can use; only allows the owner of a node to set its
+ * address.
+ */
+contract UsernamesResolver is Multicallable, AddrResolver, NameResolver, ReverseClaimer {
     ENS immutable ens;
     INameWrapper immutable nameWrapper;
     address immutable trustedController;
     address immutable trustedReverseRegistrar;
 
+    /**
+     * A mapping of operators. An address that is authorised for an address
+     * may make any changes to the name that the owner could, but may not update
+     * the set of authorisations.
+     * (owner, operator) => approved
+     */
     mapping(address => mapping(address => bool)) private _operatorApprovals;
+    /**
+     * A mapping of delegates. A delegate that is authorised by an owner
+     * for a name may make changes to the name's resolver, but may not update
+     * the set of token approvals.
+     * (owner, name, delegate) => approved
+     */
     mapping(address => mapping(bytes32 => mapping(address => bool))) private _tokenApprovals;
+
+    // Logged when an operator is added or removed.
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+    // Logged when a delegate is approved or  an approval is revoked.
     event Approved(
         address owner,
         bytes32 indexed node,
@@ -35,6 +55,9 @@ contract UsernamesResolver is Multicallable, AddrResolver, ReverseClaimer {
         trustedReverseRegistrar = _trustedReverseRegistrar;
     }
 
+    /**
+     * @dev See {IERC1155-setApprovalForAll}.
+     */
     function setApprovalForAll(address operator, bool approved) external {
         require(msg.sender != operator, "ERC1155: setting approval status for self");
 
@@ -42,10 +65,16 @@ contract UsernamesResolver is Multicallable, AddrResolver, ReverseClaimer {
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
+    /**
+     * @dev See {IERC1155-isApprovedForAll}.
+     */
     function isApprovedForAll(address account, address operator) public view returns (bool) {
         return _operatorApprovals[account][operator];
     }
 
+    /**
+     * @dev Approve a delegate to be able to updated records on a node.
+     */
     function approve(bytes32 node, address delegate, bool approved) external {
         require(msg.sender != delegate, "Setting delegate status for self");
 
@@ -53,6 +82,9 @@ contract UsernamesResolver is Multicallable, AddrResolver, ReverseClaimer {
         emit Approved(msg.sender, node, delegate, approved);
     }
 
+    /**
+     * @dev Check to see if the delegate has been approved by the owner for the node.
+     */
     function isApprovedFor(
         address owner,
         bytes32 node,
@@ -77,7 +109,7 @@ contract UsernamesResolver is Multicallable, AddrResolver, ReverseClaimer {
 
     function supportsInterface(
         bytes4 interfaceID
-    ) public view override(Multicallable, AddrResolver) returns (bool) {
+    ) public view override(Multicallable, AddrResolver, NameResolver) returns (bool) {
         return super.supportsInterface(interfaceID);
     }
 }

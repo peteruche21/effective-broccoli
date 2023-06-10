@@ -137,7 +137,7 @@ contract UsernamesRegistrarController is IERC165, ERC20Recoverable, ReverseClaim
         emit NameRenewed(name, labelhash, price.base, expires);
     }
 
-    function withdraw() public {
+    function withdraw() public onlyOwner {
         payable(owner()).transfer(address(this).balance);
     }
 

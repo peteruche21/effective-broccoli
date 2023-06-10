@@ -4,6 +4,24 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+enum SigCount {
+    ZERO,
+    ONE,
+    TWO
+}
+
+struct SigConfig {
+    address verifyingSigner1;
+    address verifyingSigner2;
+    SigCount validNumOfSignatures;
+}
+
+struct Debt {
+    uint256 amount;
+    address debtee;
+    IERC20 token;
+}
+
 library Helpers {
     /**
      * compares two strings
@@ -149,5 +167,20 @@ library Helpers {
         truthy = true; // true & true = true, true & false = false, false & false = false.
         // currently, the validator must be the same for the two core for delegation to work.
         truthy = truthy && useDelegate(siblings, destNamehash);
+    }
+
+    /**
+     * @notice gets the actual number of signatures passed with the userOp in paymasterInput
+     * @param signatures an array of signature
+     * @dev 0 means we don't know the length of the signature.
+     * i.e you should always explicitly check for the length if this method returns 0
+     */
+    function total(bytes calldata signatures) public pure returns (uint256) {
+        return
+            signatures.length == 64 || signatures.length == 65
+                ? 1
+                : signatures.length == 128 || signatures.length == 130
+                ? 2
+                : 0;
     }
 }
