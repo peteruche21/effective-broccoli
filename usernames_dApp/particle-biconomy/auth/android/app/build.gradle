@@ -1,0 +1,86 @@
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+
+android {
+    namespace "com.particlenet.auth"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+       sourceCompatibility JavaVersion.VERSION_11
+       targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+       jvmTarget = JavaVersion.VERSION_11
+    }
+
+    dataBinding {
+       enabled = true
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.particlenet.auth"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdkVersion 23
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+
+
+        multiDexEnabled true
+        //get from https://dashboard.particle.network/
+        manifestPlaceholders["PN_PROJECT_ID"] = "fc510708-3e32-4b2c-a13f-c06d3943601b" //your project id
+        manifestPlaceholders["PN_PROJECT_CLIENT_KEY"] = "cjRX2NedPeT2YsqTr3m0YubsCQAPTheet17qfG7F" //your project client key
+        manifestPlaceholders["PN_APP_ID"] = "3e9da31b-54c0-4e20-9ce1-ab03cb6f2917" //your app id
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    implementation("network.particle:biconomy-service:0.13.4") 
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
+    implementation "androidx.constraintlayout:constraintlayout:2.1.3"
+}
