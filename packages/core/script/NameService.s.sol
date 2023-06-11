@@ -14,7 +14,7 @@ contract DeployNameServiceScript is Script {
     bytes32 constant REVERSE_REGISTRAR_LABEL = keccak256("reverse");
     bytes32 constant ADDR_LABEL = keccak256("addr");
 
-    ENS ens; // address needed
+    ENS ens = ENS(0xFf1EcF1092C5FfA07ed0c9bcdCd397E456e4095b); // address needed
     BaseRegistrarImplementation baseRegistrar;
     UsernamesRegistrarController baseRegistrarController;
     ReverseRegistrar reverseRegistrar;

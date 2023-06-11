@@ -22,6 +22,7 @@
         "url": "https://github.com/peteruche21/effective-broccoli/issues"
     },
     "dependencies": {
-        "@ensdomains/eth-ens-namehash": "^2.0.15"
+        "@ensdomains/eth-ens-namehash": "^2.0.15",
+        "ethers": "^6.3.0"
     }
 }

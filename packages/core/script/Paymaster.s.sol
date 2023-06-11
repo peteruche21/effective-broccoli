@@ -8,11 +8,10 @@ import {UsernamesPaymaster} from "@usernames/Paymaster.sol";
 
 contract DeployPaymasterScript is Script {
     function run() external {
-        bytes32 salt = keccak256(abi.encodePacked(bytes32("PAYMASTER"), msg.sender));
-        IEntryPoint entrypoint;
-        ENS ens;
+        IEntryPoint entrypoint = IEntryPoint(0xAB395C5a16C6317f35bC88fE5fE2456ef9e0e708);
+        ENS ens = ENS(0xFf1EcF1092C5FfA07ed0c9bcdCd397E456e4095b);
         vm.startBroadcast();
-        new UsernamesPaymaster{salt: salt}(entrypoint, ens, address(0));
+        new UsernamesPaymaster(entrypoint, ens, address(0));
         vm.stopBroadcast();
     }
 }

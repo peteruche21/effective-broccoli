@@ -6,9 +6,8 @@ import "@ens/contracts/registry/ENSRegistry.sol";
 
 contract DeployENSRegistryScript is Script {
     function run() external {
-        bytes32 salt = keccak256(abi.encodePacked(bytes32("ENS_REGISTRY"), msg.sender));
         vm.startBroadcast();
-        new ENSRegistry{salt: salt}();
+        new ENSRegistry();
         vm.stopBroadcast();
     }
 }

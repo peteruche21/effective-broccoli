@@ -4,12 +4,11 @@ pragma solidity 0.8.17;
 import "forge-std/Script.sol";
 import "@aa/contracts/samples/SimpleAccount.sol";
 
-contract DeploySimpleAccountScript is Script {
+contract DeployAccountScript is Script {
     function run() external {
-        bytes32 salt = keccak256(abi.encodePacked(bytes32("SIMPLE_ACCOUNT"), msg.sender));
-        IEntryPoint entrypoint;
+        IEntryPoint entrypoint = IEntryPoint(0xAB395C5a16C6317f35bC88fE5fE2456ef9e0e708);
         vm.startBroadcast();
-        new SimpleAccount{salt: salt}(entrypoint);
+        new SimpleAccount(entrypoint);
         vm.stopBroadcast();
     }
 }

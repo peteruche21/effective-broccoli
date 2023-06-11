@@ -2,13 +2,30 @@
 pragma solidity 0.8.17;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@usernames/interfaces/ISupraConsumer.sol";
 import {IERC20} from "@usernames/library/Helpers.sol";
 
 library PriceFeedConsumer {
     // base = erc20 e.g uniswap
     // quote = eth/usd
 
-    // price derivation method accepting global quote
+    // gets the derived price using supra oracle
+    function getDerivedPrice(
+        address priceFeed,
+        string memory _base,
+        uint8 _baseDecimals,
+        string memory _quote,
+        int256 amount
+    ) public view returns (int256) {
+        (int256 base, ) = ISupraConsumer(priceFeed).checkPrice(_base);
+        base = _scalePrice(base, 8, _baseDecimals);
+        (int256 quote, ) = ISupraConsumer(priceFeed).checkPrice(_quote);
+        quote = _scalePrice(quote, 8, _baseDecimals);
+        amount = _scalePrice(amount, 18, _baseDecimals);
+        return (amount * quote) / base;
+    }
+
+    // price derivation method accepting global quote using chainlink oracle
     function getDerivedPrice(
         mapping(IERC20 => address) storage self,
         IERC20 token,
