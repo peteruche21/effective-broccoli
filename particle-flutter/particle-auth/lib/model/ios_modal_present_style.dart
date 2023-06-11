@@ -1,0 +1,4 @@
+enum IOSModalPresentStyle {
+    fullScreen,
+    formSheet,
+}
