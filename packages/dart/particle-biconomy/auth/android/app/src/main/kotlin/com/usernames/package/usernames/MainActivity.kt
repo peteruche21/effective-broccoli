@@ -1,4 +1,4 @@
-package com.particlenet.auth
+package com.usernames.package.usernames
 
 import io.flutter.embedding.android.FlutterActivity
 
