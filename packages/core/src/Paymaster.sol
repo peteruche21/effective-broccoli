@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.17;
 
 import "@aa/contracts/core/BasePaymaster.sol";
 import "@usernames/security/Guard.sol";
@@ -9,7 +9,8 @@ import "@usernames/library/Helpers.sol";
 import "@usernames/utils/OracleConsumer.sol";
 import "@usernames/registrars/FIFSRegistrar.sol";
 
-// NOTE: the `_validatePaymasterUserOp` and `_postOp` can be gamed, so please do not use this in production
+// NOTE: THIS CODE HAS NOT BEEN AUDITED
+// NOTE: the `_validatePaymasterUserOp` and `_postOp` is not guaranteed, so please do not use this in production
 // for ease of testing (reduced validation steps, only this storage access, cheaper userOp validation)
 // userOp payment logic is completely moved to the postOp
 // this makes the paymaster to pay at least one gas free transaction, even if the userOp sender
@@ -39,10 +40,10 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
 
     address public ethPriceFeed;
 
-    mapping(bytes32 => uint256) nodeToBalance;
+    mapping(bytes32 => uint256) public nodeToBalance;
     mapping(address => uint256) public senderNonce;
-    mapping(IERC20 => address) tokenToPriceFeed;
-    mapping(bytes32 => SigConfig) nodeToConfig;
+    mapping(IERC20 => address) public tokenToPriceFeed;
+    mapping(bytes32 => SigConfig) public nodeToConfig;
 
     mapping(address => mapping(bytes32 => Debt)) public debt;
 
@@ -54,27 +55,10 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     constructor(
         IEntryPoint _entryPoint,
         ENS ensAddr,
-        address _ethPriceFeed,
-        address _owner
-    ) BasePaymaster(_entryPoint) Ownable(_owner) {
+        address _ethPriceFeed
+    ) BasePaymaster(_entryPoint) {
         ens = ensAddr;
         ethPriceFeed = _ethPriceFeed;
-    }
-
-    function pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {
-        // lighter signature scheme. must match UserOp.ts#packUserOp
-        bytes calldata pnd = userOp.paymasterAndData;
-        // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
-        // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
-        // than referencing each field separately.
-        assembly {
-            let ofs := userOp
-            let len := sub(sub(pnd.offset, ofs), 32)
-            ret := mload(0x40)
-            mstore(0x40, add(ret, add(len, 32)))
-            mstore(ret, len)
-            calldatacopy(add(ret, 32), ofs, len)
-        }
     }
 
     /**
@@ -94,7 +78,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         return
             keccak256(
                 abi.encode(
-                    pack(userOp),
+                    _pack(userOp),
                     block.chainid,
                     address(this),
                     senderNonce[userOp.getSender()],
@@ -293,7 +277,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
             requiredPreFund;
 
         if (mode == PostOpMode.postOpReverted) {
-            // if popstOp reverted, deduct a fine from the node balance for signing a to-be-reverted post-operation
+            // if postOp reverted, deduct a fine from the node balance for having a to-be-reverted post-operation
             nodeToBalance[nodeHash] -= (realCost * REVERT_FINE_CONSTANT) / 1e24;
             // cache the supposed amount as debt to be consumed in the next operation
             debt[account][nodeHash] = Debt(
@@ -331,5 +315,21 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
             debt[debtor][node].amount,
             debt[debtor][node].token
         );
+    }
+
+    function _pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {
+        // lighter signature scheme. must match UserOp.ts#packUserOp
+        bytes calldata pnd = userOp.paymasterAndData;
+        // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
+        // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
+        // than referencing each field separately.
+        assembly {
+            let ofs := userOp
+            let len := sub(sub(pnd.offset, ofs), 32)
+            ret := mload(0x40)
+            mstore(0x40, add(ret, add(len, 32)))
+            mstore(ret, len)
+            calldatacopy(add(ret, 32), ofs, len)
+        }
     }
 }

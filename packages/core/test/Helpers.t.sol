@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Helpers} from "@usernames/library/Helpers.sol";
+import {Helpers, IERC20} from "@usernames/library/Helpers.sol";
 import {TestContract} from "mocks/MocksAndContracts.t.sol";
-import {ERC20Test, IERC20} from "@usernames/tokens/ERC20.sol";
+import {ERC20Test} from "@usernames/tokens/ERC20.sol";
 
 contract HelperLibTest is Test {
     using Helpers for *;

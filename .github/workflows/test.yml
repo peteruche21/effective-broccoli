@@ -33,15 +33,10 @@ jobs:
                   make install target=core
               id: install
 
-            - name: Run Forge update
+            - name: Run Forge update-ens
               run: |
-                  make update target=core
+                  make update-ens target=core
               id: update
-
-            - name: Run perform-modifications
-              run: |
-                  make perform-modifications
-              id: perform-modifications
 
             - name: Run Forge build
               run: |
