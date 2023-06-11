@@ -9,37 +9,13 @@ class HomeScreen extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
           // backgroundColor: Colors.red,
-          body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 10.h,
-            ),
-            Row(
-              children: [
-                Container(
-                  height: 25.h,
-                  width: 15.w,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15).w,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(
-                  width: 5.w,
-                ),
-                const Text(
-                  'UserNames',
-                  style: TextStyle(
-                      color: Colors.black, fontFamily: 'Aunchanted Xspace'),
-                ),
-                Expanded(child: Container()),
-                const Icon(Icons.menu),
-              ],
-            ),
-            const GreenCard()
-          ],
+          body: Center(
+        child: Text(
+          'COMING SOON...',
+          style: TextStyle(
+              color: Colors.black,
+              fontFamily: "Solomon's Key True Type",
+              fontSize: 20.sp),
         ),
       )),
     );

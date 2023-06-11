@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:oktoast/oktoast.dart';
 import 'package:particle_wallet_connect/model/Dapp_info.dart';
 import 'package:particle_wallet_connect/model/request_result.dart';
 import 'package:particle_wallet_connect/model/wallet_meta_data.dart';
