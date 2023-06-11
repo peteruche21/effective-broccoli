@@ -1,4 +1,0 @@
-enum WalletDisplay {
-    token,
-    nft,
-}
