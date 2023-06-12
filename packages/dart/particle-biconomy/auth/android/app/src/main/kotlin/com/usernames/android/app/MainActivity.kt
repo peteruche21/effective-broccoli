@@ -1,4 +1,4 @@
-package com.usernames.package.usernames
+package com.usernames.android.app
 
 import io.flutter.embedding.android.FlutterActivity
 

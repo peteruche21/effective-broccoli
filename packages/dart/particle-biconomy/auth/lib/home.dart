@@ -51,7 +51,7 @@ class GreenCard extends StatelessWidget {
               style: TextStyle(
                   fontFamily: 'Aunchanted Xspace',
                   fontSize: 15.sp,
-                  color: Color(0xff78B52F)
+                  color:const Color(0xff78B52F)
                   // color: Colors.grey
                   ),
             )

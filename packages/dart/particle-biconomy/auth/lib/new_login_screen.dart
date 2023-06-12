@@ -30,7 +30,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
   final TextEditingController? textEditingController = TextEditingController();
   bool isUsernameValid = true;
   bool validate = false;
-  final currName = MockEthNames();
+  final currentName = MockEthNames();
   final GlobalKey<FormState> formKey = GlobalKey();
 
   Future<void> createBlockchainAccount() async {

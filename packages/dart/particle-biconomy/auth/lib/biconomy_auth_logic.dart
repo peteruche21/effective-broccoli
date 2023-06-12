@@ -42,7 +42,7 @@ class BiconomyAuthlogic {
   static void isSupportChainInfo() async {
     var result =
         await ParticleBiconomy.isSupportChainInfo(EthereumChain.goerli());
-    print(result);
+    log('$result');
     log("isSupportChainInfo: $result");
   }
 
@@ -52,11 +52,11 @@ class BiconomyAuthlogic {
     final status = jsonDecode(result)["status"];
     final data = jsonDecode(result)["data"];
     if (status == true || status == 1) {
-      var isDelpoy = jsonDecode(result)["data"];
-      print(isDelpoy);
+      var isDeploy = jsonDecode(result)["data"];
+      log(isDeploy);
     } else {
       final error = RpcError.fromJson(data);
-      print(error);
+      log('$error');
     }
 
     log("isDeploy: $result");
@@ -64,7 +64,7 @@ class BiconomyAuthlogic {
 
   static void isBiconomyModeEnable() async {
     var result = await ParticleBiconomy.isBiconomyModeEnable();
-    print(result);
+    log('$result');
     log("isBiconomyModeEnable: $result");
   }
 
@@ -83,7 +83,7 @@ class BiconomyAuthlogic {
     List<String> transactions = <String>[transaction];
     var result =
         await ParticleBiconomy.rpcGetFeeQuotes(publicAddress, transactions);
-    print(result[0]["address"]);
+    log(result[0]["address"]);
     log("rpcGetFeeQuotes: $result");
   }
 
@@ -124,17 +124,17 @@ class BiconomyAuthlogic {
   static void loginParticle() async {
     final result =
         await ParticleAuth.login(LoginType.email, "", [SupportAuthType.all]);
-    print(result);
+    log(result);
   }
 
   static void loginMetamask() async {
     final result = await ParticleConnect.connect(WalletType.metaMask);
-    print(result);
+    log(result);
   }
 
   static void setChainInfo() async {
     final result = await ParticleAuth.setChainInfo(PolygonChain.mumbai());
-    print(result);
+    log('$result');
   }
 
   static void batchSendTransactions() async {

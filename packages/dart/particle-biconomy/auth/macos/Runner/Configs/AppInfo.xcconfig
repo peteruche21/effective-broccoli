@@ -8,7 +8,7 @@
 PRODUCT_NAME = auth
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.particlenet.auth
+PRODUCT_BUNDLE_IDENTIFIER = com.usernames.android.app;
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 com.particlenet. All rights reserved.
