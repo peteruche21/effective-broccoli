@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.17;
 
 import "@aa/contracts/core/BasePaymaster.sol";
 import "@usernames/security/Guard.sol";
@@ -8,8 +8,10 @@ import "@usernames/library/Errors.sol";
 import "@usernames/library/Helpers.sol";
 import "@usernames/utils/OracleConsumer.sol";
 import "@usernames/registrars/FIFSRegistrar.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-// NOTE: the `_validatePaymasterUserOp` and `_postOp` can be gamed, so please do not use this in production
+// NOTE: THIS CODE HAS NOT BEEN AUDITED
+// NOTE: the `_validatePaymasterUserOp` and `_postOp` is not guaranteed, so please do not use this in production
 // for ease of testing (reduced validation steps, only this storage access, cheaper userOp validation)
 // userOp payment logic is completely moved to the postOp
 // this makes the paymaster to pay at least one gas free transaction, even if the userOp sender
@@ -29,7 +31,7 @@ import "@usernames/registrars/FIFSRegistrar.sol";
 contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     using ECDSA for bytes32;
     using UserOperationLib for UserOperation;
-    using PriceFeedConsumer for mapping(IERC20 => address);
+    using PriceFeedConsumer for address;
     using Helpers for *;
 
     // estimated cost of executing the post_operation
@@ -37,12 +39,12 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     // used to calculate the amount that will be placed as fine for reverted transactions
     uint256 public constant REVERT_FINE_CONSTANT = .1e24;
 
-    address public ethPriceFeed;
+    address public priceFeed;
 
-    mapping(bytes32 => uint256) nodeToBalance;
+    mapping(bytes32 => uint256) public nodeToBalance;
     mapping(address => uint256) public senderNonce;
-    mapping(IERC20 => address) tokenToPriceFeed;
-    mapping(bytes32 => SigConfig) nodeToConfig;
+    mapping(IERC20Metadata => string) public tokenToUSDPair;
+    mapping(bytes32 => SigConfig) public nodeToConfig;
 
     mapping(address => mapping(bytes32 => Debt)) public debt;
 
@@ -54,27 +56,10 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     constructor(
         IEntryPoint _entryPoint,
         ENS ensAddr,
-        address _ethPriceFeed,
-        address _owner
-    ) BasePaymaster(_entryPoint) Ownable(_owner) {
+        address _ethPriceFeed
+    ) BasePaymaster(_entryPoint) {
         ens = ensAddr;
-        ethPriceFeed = _ethPriceFeed;
-    }
-
-    function pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {
-        // lighter signature scheme. must match UserOp.ts#packUserOp
-        bytes calldata pnd = userOp.paymasterAndData;
-        // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
-        // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
-        // than referencing each field separately.
-        assembly {
-            let ofs := userOp
-            let len := sub(sub(pnd.offset, ofs), 32)
-            ret := mload(0x40)
-            mstore(0x40, add(ret, add(len, 32)))
-            mstore(ret, len)
-            calldatacopy(add(ret, 32), ofs, len)
-        }
+        priceFeed = _ethPriceFeed;
     }
 
     /**
@@ -94,7 +79,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         return
             keccak256(
                 abi.encode(
-                    pack(userOp),
+                    _pack(userOp),
                     block.chainid,
                     address(this),
                     senderNonce[userOp.getSender()],
@@ -124,11 +109,10 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
 
     ///
     /// @param token An ERC20 Token, will be used for gas payment
-    /// @param priceFeed the corresponding priceFeed for that token
+    /// @param pair the corresponding string pair for that token e.g eth_usdt
     /// @dev only tokens with priceFeeds can be set. (stable and non stable);
-    function addToken(IERC20 token, address priceFeed) external onlyOwner {
-        require(tokenToPriceFeed[token] == address(0), "Token already set");
-        tokenToPriceFeed[token] = priceFeed;
+    function addToken(IERC20Metadata token, string memory pair) external onlyOwner {
+        tokenToUSDPair[token] = pair;
     }
 
     function fundNode(bytes32 node) external payable {
@@ -180,9 +164,11 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         );
 
         // fetches the token the user wants to use in paying gas fee
-        IERC20 feeToken = IERC20(address(bytes20(userOp.paymasterAndData[116:136])));
+        IERC20Metadata feeToken = IERC20Metadata(
+            address(bytes20(userOp.paymasterAndData[116:136]))
+        );
         // if there is no price oracle associated with the token, it is reverted
-        if (tokenToPriceFeed[feeToken] == address(0)) revert FailedToValidatedOp();
+        if (bytes(tokenToUSDPair[feeToken]).length == 0) revert FailedToValidatedOp();
         // the signatures can either be of length 64 || 65
         bytes calldata signatures = userOp.paymasterAndData[116 + 20:];
         bytes32 hash = ECDSA.toEthSignedMessageHash(
@@ -280,11 +266,11 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     ) internal virtual override {
         (
             address account,
-            IERC20 feeToken,
+            IERC20Metadata feeToken,
             uint256 gasPrice,
             uint256 requiredPreFund,
             bytes32 nodeHash
-        ) = abi.decode(context, (address, IERC20, uint256, uint256, bytes32));
+        ) = abi.decode(context, (address, IERC20Metadata, uint256, uint256, bytes32));
 
         // calculate a token equivalent of the pre-calculated expenses
         int256 tokenCost = _getPriceFromOracle(feeToken, requiredPreFund);
@@ -293,7 +279,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
             requiredPreFund;
 
         if (mode == PostOpMode.postOpReverted) {
-            // if popstOp reverted, deduct a fine from the node balance for signing a to-be-reverted post-operation
+            // if postOp reverted, deduct a fine from the node balance for having a to-be-reverted post-operation
             nodeToBalance[nodeHash] -= (realCost * REVERT_FINE_CONSTANT) / 1e24;
             // cache the supposed amount as debt to be consumed in the next operation
             debt[account][nodeHash] = Debt(
@@ -318,10 +304,16 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     /// @param token ERC20 token to check price
     /// @param amount amount to convert after checking price
     function _getPriceFromOracle(
-        IERC20 token,
+        IERC20Metadata token,
         uint256 amount
     ) internal view returns (int256 _price) {
-        _price = tokenToPriceFeed.getDerivedPrice(token, ethPriceFeed, int256(amount));
+        _price = priceFeed.getDerivedPrice(
+            tokenToUSDPair[token],
+            token.decimals(),
+            // using Eth for native conversion because MNT is not in the feeds
+            "eth_usdc",
+            int256(amount)
+        );
     }
 
     /// @notice pay the debt to the node owner
@@ -331,5 +323,21 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
             debt[debtor][node].amount,
             debt[debtor][node].token
         );
+    }
+
+    function _pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {
+        // lighter signature scheme. must match UserOp.ts#packUserOp
+        bytes calldata pnd = userOp.paymasterAndData;
+        // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
+        // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
+        // than referencing each field separately.
+        assembly {
+            let ofs := userOp
+            let len := sub(sub(pnd.offset, ofs), 32)
+            ret := mload(0x40)
+            mstore(0x40, add(ret, add(len, 32)))
+            mstore(ret, len)
+            calldatacopy(add(ret, 32), ofs, len)
+        }
     }
 }

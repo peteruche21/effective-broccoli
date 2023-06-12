@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.17;
 
 import "@usernames/library/Errors.sol";
 import "@usernames/interfaces/IUsernamesRegistrarController.sol";
@@ -38,9 +38,8 @@ contract UsernamesRegistrarController is IERC165, ERC20Recoverable, ReverseClaim
         BaseRegistrarImplementation _base,
         ReverseRegistrar _reverseRegistrar,
         INameWrapper _nameWrapper,
-        ENS _ens,
-        address _owner
-    ) ReverseClaimer(_ens, msg.sender) Ownable(_owner) {
+        ENS _ens
+    ) ReverseClaimer(_ens, msg.sender) {
         base = _base;
         reverseRegistrar = _reverseRegistrar;
         nameWrapper = _nameWrapper;

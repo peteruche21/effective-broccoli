@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.17;
 
 import "@ens/contracts/registry/ENS.sol";
-import "@ens/contracts/reverseRegistrar/IReverseRegistrar.sol";
+import "@usernames/interfaces/IReverseRegistrar.sol";
 import "@ens/contracts/root/Controllable.sol";
 
 abstract contract NameResolver {
@@ -25,9 +25,8 @@ contract ReverseRegistrar is Controllable, IReverseRegistrar {
      * @dev Constructor
      * @param ensAddr The address of the ENS registry.
      */
-    constructor(ENS ensAddr, address _owner) Ownable(_owner) {
+    constructor(ENS ensAddr) {
         ens = ensAddr;
-
         // Assign ownership of the reverse record to our deployer
         ReverseRegistrar oldRegistrar = ReverseRegistrar(ensAddr.owner(ADDR_REVERSE_NODE));
         if (address(oldRegistrar) != address(0x0)) {

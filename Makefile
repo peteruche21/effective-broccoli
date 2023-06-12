@@ -11,6 +11,8 @@ install :; @$(MAKE) -C packages/$(target) install-inner
 # Update Dependencies
 update:; @$(MAKE) -C packages/$(target) update
 
+update-ens :; @$(MAKE) -C packages/$(target) update-ens
+
 # Build the project
 build:; @$(MAKE) -C packages/$(target) build
 
@@ -37,5 +39,3 @@ fork :; @anvil --fork-url $${$(CHAIN)_RPC_URL} -m 'test test test test test test
 deploy-local :; @forge script packages/$(target)/script/${contract}.s.sol:Deploy${contract} --rpc-url http://localhost:8545  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast 
 
 factory-deploy :; @cast send --interactive 1 --rpc-url $${$(CHAIN)_RPC_URL} --json 0xfactoryAddress "deploy(address admin, uint256 _salt, Type paymasterType)" ${admin} ${salt} ${choice}
-
-perform-modifications :; @$(MAKE) -C packages/core perform-modifications
