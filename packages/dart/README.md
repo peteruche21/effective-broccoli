@@ -1,57 +1,32 @@
-# Particle Flutter SDKs
+# Web3 usernames package
 
-![](https://img.shields.io/pub/v/particle_auth?color=blue&style=round) 
+<a href="https://particle.network/">
+  <h1 align="center">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://storage.googleapis.com/cms-storage-bucket/6e19fee6b47b36ca613f.png">
+      <img alt="usernames" src="https://github.com/peteruche21/effective-broccoli/blob/main/img/2.png">
+    </picture>
+  </h1>
+</a>
 
-Particle Auth is a simple self-custodial auth infra for Web3 apps and wallets.
+Usernames is an intended Flutter package that is expected to ensure easy authentication flow for any dApp on the mantle blockchain
 
-Particle Connect is the best way to onboard any user for your dApp.
+Usernames is the best way connect to any of your dApps using ENS domains. 
 
-Particle Wallet is not an independent wallet—it is a wallet infrastructure plugged into apps or wallets.
+Usernames is not an independent package, it is intended to be an infrastructure plugged into apps.
 
-## Getting Started 
+## Dependencies
+This dApp depends on `Particle SDK` to spin up accounts for users through account abstraction.
 
-[Auth Doc](https://docs.particle.network/developers/auth-service/sdks/flutter)
+Particle is a Full-stack infrastructure for developers to easily build dApps. [See here to find out more](https://docs.particle.network/overview/readme)
 
-### Use this package as a library
+## Documentation
 
-Depend on it
+* [Install Flutter](https://flutter.dev/get-started/)
+* [Flutter documentation](https://docs.flutter.dev/)
+* [Development wiki](https://github.com/flutter/flutter/wiki)
 
-Run this command:
 
-With Flutter:
-```
-flutter pub add particle_auth
-```
-This will add a line like this to your package's pubspec.yaml (and run an implicit flutter pub get):
-
-Import it
-Now in your Dart code, you can use:
-```
-import 'package:particle_auth/particle_auth.dart';
-```
-
-Import Connect and Wallet SDKs using the same method
-
-[Connect Doc](https://docs.particle.network/developers/connect-service/sdks/flutter)
-
-```
-flutter pub add particle_connect
-```
-```
-import 'package:particle_connect/particle_connect.dart';
-```
-
-[Wallet Doc](https://docs.particle.network/developers/wallet-service/sdks/flutter)
-```
-flutter pub add particle_wallet
-```
-```
-import 'package:particle_wallet/particle_wallet.dart';
-```
-
-### Structure Transaction
-In particle-auth/example/lib/mock/transaction_mock.dart, We provide several examples that show how to structure transactions,
-how to read contract and write contract.
 
 
 
