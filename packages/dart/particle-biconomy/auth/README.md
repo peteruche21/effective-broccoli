@@ -1,16 +1,44 @@
-# auth
+# Web3 usernames package
 
-A new Flutter project.
+<a href="https://particle.network/">
+  <h1 align="center">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://storage.googleapis.com/cms-storage-bucket/6e19fee6b47b36ca613f.png">
+      <img alt="usernames" src="https://github.com/peteruche21/effective-broccoli/blob/main/img/2.png">
+    </picture>
+  </h1>
+</a>
 
-## Getting Started
+Usernames is an intended Flutter package that is expected to ensure easy authentication flow for any dApp on the mantle blockchain
 
-This project is a starting point for a Flutter application.
+Usernames is the best way connect to any of your dApps using ENS domains. 
 
-A few resources to get you started if this is your first Flutter project:
+Usernames is not an independent package, it is intended to be an infrastructure plugged into apps.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Dependencies
+This dApp depends on `Particle SDK` to spin up accounts for users through account abstraction.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Particle is a Full-stack infrastructure for developers to easily build dApps. [See here to find out more](https://docs.particle.network/overview/readme)
+
+## Documentation
+
+* [Install Flutter](https://flutter.dev/get-started/)
+* [Flutter documentation](https://docs.flutter.dev/)
+* [Development wiki](https://github.com/flutter/flutter/wiki)
+
+## Run Usernames
+Usernames at its development stage depend internal code from particle, hence the number of folders.
+Usernames dApp is located at 
+```
+packages/dart/particle-biconomy/auth
+
+```
+
+To run usernames after cloning, run the following commands:
+```
+flutter pub get 
+flutter run
+```
+
+
+
