@@ -26,6 +26,20 @@ Particle is a Full-stack infrastructure for developers to easily build dApps. [S
 * [Flutter documentation](https://docs.flutter.dev/)
 * [Development wiki](https://github.com/flutter/flutter/wiki)
 
+## Run Usernames
+Usernames at its development stage depend internal code from particle, hence the number of folders.
+Usernames dApp is located at 
+```
+packages/dart/particle-biconomy/auth
+
+```
+
+To run usernames after cloning, run the following commands:
+```
+flutter pub get 
+flutter run
+```
+
 
 
 
