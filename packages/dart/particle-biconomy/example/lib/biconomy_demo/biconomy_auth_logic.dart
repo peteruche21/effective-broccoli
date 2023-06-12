@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:oktoast/oktoast.dart';
 import 'package:particle_auth/model/biconmoy_fee_mode.dart';
@@ -43,7 +44,7 @@ class BiconomyAuthLogic {
   static void isSupportChainInfo() async {
     var result =
         await ParticleBiconomy.isSupportChainInfo(EthereumChain.mainnet());
-    print(result);
+    log('$result');
     showToast("isSupportChainInfo: $result");
   }
 
@@ -53,11 +54,11 @@ class BiconomyAuthLogic {
     final status = jsonDecode(result)["status"];
     final data = jsonDecode(result)["data"];
     if (status == true || status == 1) {
-      var isDelpoy = jsonDecode(result)["data"];
-      print(isDelpoy);
+      var isDeploy = jsonDecode(result)["data"];
+      log(isDeploy);
     } else {
       final error = RpcError.fromJson(data);
-      print(error);
+      log('$error');
     }
 
     showToast("isDeploy: $result");
@@ -65,7 +66,7 @@ class BiconomyAuthLogic {
 
   static void isBiconomyModeEnable() async {
     var result = await ParticleBiconomy.isBiconomyModeEnable();
-    print(result);
+    log('$result');
     showToast("isBiconomyModeEnable: $result");
   }
 
@@ -84,7 +85,7 @@ class BiconomyAuthLogic {
     List<String> transactions = <String>[transaction];
     var result =
         await ParticleBiconomy.rpcGetFeeQuotes(publicAddress, transactions);
-    print(result[0]["address"]);
+    log(result[0]["address"]);
     showToast("rpcGetFeeQuotes: $result");
   }
 
@@ -125,17 +126,17 @@ class BiconomyAuthLogic {
   static void loginParticle() async {
     final result =
         await ParticleAuth.login(LoginType.email, "", [SupportAuthType.all]);
-    print(result);
+    log(result);
   }
 
   static void loginMetamask() async {
     final result = await ParticleConnect.connect(WalletType.metaMask);
-    print(result);
+    log(result);
   }
 
   static void setChainInfo() async {
     final result = await ParticleAuth.setChainInfo(PolygonChain.mumbai());
-    print(result);
+    log('$result');
   }
 
   static void batchSendTransactions() async {
