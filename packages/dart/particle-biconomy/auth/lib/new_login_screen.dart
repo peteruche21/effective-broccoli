@@ -1,16 +1,19 @@
 import 'dart:developer';
-
 import 'package:auth/biconomy_auth_logic.dart';
 import 'package:auth/home.dart';
+import 'package:auth/services/user_name_resolver.dart';
 import 'package:auth/user_names.dart';
+import 'package:auth/utils/constants.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
+import 'package:http/http.dart';
 import 'package:particle_auth/model/chain_info.dart';
 import 'package:particle_auth/model/login_info.dart';
 import 'package:particle_auth/particle_auth.dart';
+import 'package:web3dart/web3dart.dart';
 
 class NewLoginScreen extends StatefulWidget {
   const NewLoginScreen({
@@ -52,24 +55,40 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
     super.dispose();
   }
 
-  // bool _isUsernameAvailable(String username) {
-  //   return !widget.MockEthNames.doesExist(username);
-  // }
-
-// final String currentValue = us
   String checkUsername() {
     String? username = textEditingController!.text;
     if (!username.contains('.usernames.bit')) {
       username = username + '.usernames.bit';
+      return username;
     }
     return username;
   }
 
+//hash username
+  final dio = Dio();
+  Future<String?> getHashedName(String userName) async {
+    try {
+      final response = await dio.get(Constants.nameHashUrl + '?node=$userName');
+      log('hashed value $response');
+      return response.data;
+    } catch (e) {
+      log(e.toString());
+      return e.toString();
+    }
+  }
+
+  Client? httpClient;
+  Web3Client? web3client;
+
   @override
   void initState() {
+    httpClient = Client();
+    web3client = Web3Client(Constants.mantleTestNet, httpClient!);
     textEditingController?.addListener(() {
       checkUsername();
     });
+    // final username = checkUsername();
+
     BiconomyAuthlogic.init();
     super.initState();
   }
@@ -77,7 +96,6 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
   @override
   Widget build(BuildContext context) {
     String username = checkUsername();
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -172,10 +190,15 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       final username = checkUsername();
-                      bool isTrue = MockEthNames.doesExist(username);
-                      if (isTrue) {
+                      final nameToResolve = await getHashedName(username);
+                      final addr = await loadNameResolverContract(
+                          web3client, nameToResolve.toString());
+
+                      if (addr?.length == 42 &&
+                          !(addr?.substring(2, 6) == '0000')) {
+                        // ignore: use_build_context_synchronously
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -184,7 +207,9 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                             },
                           ),
                         );
-                      } else if (!MockEthNames.doesExist(username)) {
+                      } else if (addr == null ||
+                          addr.isEmpty ||
+                          addr.substring(2, 6) == '0000') {
                         Fluttertoast.showToast(
                             msg:
                                 "Username does not exist\n please create an account",
@@ -232,27 +257,6 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
       ),
     );
   }
-
-  // Row createAccountAndLogin() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.center,
-  //     children: [
-
-  //       const SizedBox(
-  //         width: 30,
-  //       ),
-  //       TextButton(
-  //           onPressed: () {},
-  //           child: const Text(
-  //             'Login/Link',
-  //             style: TextStyle(
-  //                 fontFamily: 'Aunchanted Xspace',
-  //                 fontWeight: FontWeight.bold,
-  //                 color: Colors.black),
-  //           )),
-  //     ],
-  //   );
-  // }
 }
 
 class UserNameInput extends StatefulWidget {
@@ -327,49 +331,3 @@ class _UserNameInputState extends State<UserNameInput> {
     );
   }
 }
-
-//  Fluttertoast.showToast(
-//         msg: "This username does not exist",
-//         toastLength: Toast.LENGTH_SHORT,
-//         gravity: ToastGravity.CENTER,
-//         timeInSecForIosWeb: 1,
-//         backgroundColor: Colors.red,
-//         textColor: Colors.white,
-//         fontSize: 16.0);
-
-// submit without using button
-  // void _submitForm() {
-  //   if (_formKey.currentState?.validate() == true) {
-  //     _formKey.currentState?.save();
-  //     // String domain = '.eth';
-  //     String? username = textEditingController!.text;
-
-  //     if (!username.contains('.eth')) {
-  //       final name = username + '.eth';
-  //       log(name);
-  //       bool works = MockEthNames.doesExist(name);
-  //       if (works) {
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (BuildContext context) {
-  //               return const HomeScreen();
-  //             },
-  //           ),
-  //         );
-  //       } else {
-  //         if (MockEthNames.doesExist(name)) {
-  //           Fluttertoast.showToast(
-  //               msg: "This username does not exist",
-  //               toastLength: Toast.LENGTH_SHORT,
-  //               gravity: ToastGravity.CENTER,
-  //               timeInSecForIosWeb: 1,
-  //               backgroundColor: Colors.red,
-  //               textColor: Colors.white,
-  //               fontSize: 16.0);
-  //         }
-  //       }
-  //     }
-  //     log('Form submitted!');
-  //   }
-  // }
