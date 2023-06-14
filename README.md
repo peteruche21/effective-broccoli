@@ -79,11 +79,30 @@ This creates a situation where:
 
 usernames on Mantle are NFTS, which allows you to connect with and link a name to a smart account or log in with a username, instead of the conventional connect wallet. You can have one wallet associated with a Dapk, or one wallet associated with multiple Dapks.
 
+![usernames](./img/6.png)
+
 usernames are your web3 username, unique for every Dapk built on Mantle.
 
 usernames are intended to be an infrastructure plugged into Dapks, ensuring a smoother web3 onboarding.
 
 ## DAPKs (Decentralized Mobile Apps)
+
+Why do you need a wallet? to store your assets right?
+
+You have a mobile browser, why do you need to have a special-purpose browser inside your wallet?
+
+As a developer, do you think limiting your applications to the web helps you attain your target customers?
+No! Because most people don’t use browsers anymore; they prefer using apps like Wallet that provide you with a browser.
+Also, what will happen if [Google](google.com) joins [Apple to restrict third-party browsers](#)?
+
+[usernames](#) in a bid to answer some of these questions and Encourage Dapps which are natively **mobile** apps introduce **usernames**, A `Web3 Login Kit` written in `Dart` which uses `Account Abstraction` to effect a paradigm in decentralized applications development.
+Providing the tools needed to publish a dapk to an app store.
+
+Dapks (Decentralized Mobile Applications)
+
+![Dapks](./img/5.png)
+
+## How It Works
 
 ### Login with subdomains
 
@@ -91,10 +110,16 @@ The name login flow is as follows:
 
 - open a Dapk (decentralized mobile app)
 - enter your username (e.g `Peter`)
-- the system gets the full nameHash with the node represented by the app (e.g Peter.google.bit)
+  
+  ![Dapks](./img/7.png)
+
+- the system gets the full nameHash with the node represented by the app (e.g `peter.google.bit`)
 - resolve the name and try to log in the user
 - if the resolved name is different from the account address destroy the session and prompt the user.
-- if the name is not registered, ask the user to log in/create a new smart account and link the name to it, then login.
+
+  ![Dapks](./img/8.png)
+
+- if the name is not registered, ask the user to log in/create a new smart account and link the name to it, then log in.
 - encourage users to set up a backup (e.g with Google OAuth)
 
 ### Gasless name registration
@@ -103,11 +128,11 @@ when signing up a user for the first time into a Dapk, it is a constant that the
 It is also possible that the user is a first-timer with no balance.
 When a user is prompted to create a smart account and link:
 
+![Dapks](./img/9.png)
+
 - the system sets up a new account, registers the provided name, with the address of the new account
 - caches the operation cost in the paymaster to be paid by the user when trying to send another operation.
 - logs the user in
-
-## How It Works
 
 ## Getting Started
 
