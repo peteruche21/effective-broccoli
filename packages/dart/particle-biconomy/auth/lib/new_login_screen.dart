@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'package:auth/biconomy_auth_logic.dart';
+import 'package:auth/create_account_model.dart';
 import 'package:auth/home.dart';
 import 'package:auth/services/user_name_resolver.dart';
 import 'package:auth/user_names.dart';
@@ -235,8 +237,20 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                       if (username.isEmpty ||
                           !MockEthNames.doesExist(username)) ...[
                         TextButton(
-                          onPressed: () {
-                            BiconomyAuthlogic.loginParticle();
+                          onPressed: () async {
+                            // String response =
+                            final result =
+                                await BiconomyAuthlogic.loginParticle();
+                            final parsedData =
+                                CreateAccountModel.fromJson(jsonDecode(result));
+
+                            if (parsedData.data!.uuid != null) {
+                              // ignore: use_build_context_synchronously
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                return const HomeScreen();
+                              }));
+                            }
                           },
                           child: const Text(
                             'Create account',

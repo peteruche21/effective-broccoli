@@ -121,10 +121,11 @@ class BiconomyAuthlogic {
     log("signature $signature");
   }
 
-  static void loginParticle() async {
+  static Future<String> loginParticle() async {
     final result =
         await ParticleAuth.login(LoginType.email, "", [SupportAuthType.all]);
     log(result);
+    return result;
   }
 
   static void loginMetamask() async {
