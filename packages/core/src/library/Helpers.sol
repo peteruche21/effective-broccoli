@@ -22,7 +22,7 @@ struct Debt {
     IERC20 token;
 }
 
-library Helpers {
+library HelperLibrary {
     /**
      * compares two strings
      * @param a - string A

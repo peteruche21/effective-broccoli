@@ -3,12 +3,12 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Helpers, IERC20} from "@usernames/library/Helpers.sol";
-import {TestContract} from "mocks/MocksAndContracts.t.sol";
+import {HelperLibrary, IERC20} from "@usernames/library/Helpers.sol";
+import {TestContract} from "mocks/MocksAndContracts.sol";
 import {ERC20Test} from "@usernames/tokens/ERC20.sol";
 
 contract HelperLibTest is Test {
-    using Helpers for *;
+    using HelperLibrary for *;
     using ECDSA for bytes32;
 
     bytes32[] siblings;

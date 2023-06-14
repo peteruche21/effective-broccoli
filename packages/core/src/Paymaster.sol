@@ -32,18 +32,18 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     using ECDSA for bytes32;
     using UserOperationLib for UserOperation;
     using PriceFeedConsumer for address;
-    using Helpers for *;
+    using HelperLibrary for *;
 
     // estimated cost of executing the post_operation
     uint256 public constant COST_OF_POST = 40000;
     // used to calculate the amount that will be placed as fine for reverted transactions
-    uint256 public constant REVERT_FINE_CONSTANT = .1e24;
+    uint256 public constant REVERT_FINE_CONSTANT = .05e24;
 
     address public priceFeed;
 
     mapping(bytes32 => uint256) public nodeToBalance;
     mapping(address => uint256) public senderNonce;
-    mapping(IERC20Metadata => string) public tokenToUSDPair;
+    mapping(IERC20 => string) public tokenToUSDPair;
     mapping(bytes32 => SigConfig) public nodeToConfig;
 
     mapping(address => mapping(bytes32 => Debt)) public debt;
@@ -56,10 +56,10 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     constructor(
         IEntryPoint _entryPoint,
         ENS ensAddr,
-        address _ethPriceFeed
+        address _priceFeed
     ) BasePaymaster(_entryPoint) {
         ens = ensAddr;
-        priceFeed = _ethPriceFeed;
+        priceFeed = _priceFeed;
     }
 
     /**
@@ -111,7 +111,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     /// @param token An ERC20 Token, will be used for gas payment
     /// @param pair the corresponding string pair for that token e.g eth_usdt
     /// @dev only tokens with priceFeeds can be set. (stable and non stable);
-    function addToken(IERC20Metadata token, string memory pair) external onlyOwner {
+    function addToken(IERC20 token, string memory pair) external onlyOwner {
         tokenToUSDPair[token] = pair;
     }
 
@@ -164,9 +164,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         );
 
         // fetches the token the user wants to use in paying gas fee
-        IERC20Metadata feeToken = IERC20Metadata(
-            address(bytes20(userOp.paymasterAndData[116:136]))
-        );
+        IERC20 feeToken = IERC20(address(bytes20(userOp.paymasterAndData[116:136])));
         // if there is no price oracle associated with the token, it is reverted
         if (bytes(tokenToUSDPair[feeToken]).length == 0) revert FailedToValidatedOp();
         // the signatures can either be of length 64 || 65
@@ -180,7 +178,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         // set the postOp calldata in the context
         context = abi.encodePacked(
             userOp.sender,
-            feeToken,
+            address(feeToken),
             userOp.gasPrice(),
             requiredPreFund,
             nodeHash
@@ -189,11 +187,17 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         if (expectedValidationStep == SigCount.ONE) {
             // allows either the primary signer or secondary signer to validate paymasterAndData
             // assuming 1FA signature validation is used
-            if (nodeConfig.verifyingSigner1 == address(0)) revert FailedToValidatedOp();
+            // at least one signer must be set
+            if (
+                nodeConfig.verifyingSigner1 == address(0) &&
+                nodeConfig.verifyingSigner2 == address(0)
+            ) revert FailedToValidatedOp();
             address signer = _validateOneSignature(signatures, userOp.sender, hash);
             // if signature verification fails, return SIG_VALIDATION_FAILED but do not revert
-            if (signer != nodeConfig.verifyingSigner1 || signer != nodeConfig.verifyingSigner2)
-                validationData = _packValidationData(true, validUntil, validAfter);
+            if (
+                (signer != nodeConfig.verifyingSigner1 && signer != nodeConfig.verifyingSigner2) ||
+                signer == address(0)
+            ) validationData = _packValidationData(true, validUntil, validAfter);
         } else if (expectedValidationStep == SigCount.TWO) {
             // when 2FA is enabled, the 2 signatures must be represented in any order
             // but must correspond to the signers.
@@ -249,7 +253,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
         address caller,
         bytes32 _hash
     ) internal returns (address signer1, address signer2) {
-        if (_signatures.total() == 2) revert InvalidSignatureLength();
+        if (_signatures.total() != 2) revert InvalidSignatureLength();
         (bytes memory signature1, bytes memory signature2) = _signatures.extractECDSASignatures();
         senderNonce[caller]++;
         signer1 = ECDSA.recover(_hash, signature1);
@@ -259,24 +263,24 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
     /// @notice the post operation does not guarantee that the debt will ever be cleared.
     /// while its not possible to process another userOp with an existing debt
     /// it does not stop bad actors from using this paymaster to execute expensive contract calls
+    /// with the initial free slot
     function _postOp(
         PostOpMode mode,
         bytes calldata context,
         uint256 actualGasCost
     ) internal virtual override {
-        (
-            address account,
-            IERC20Metadata feeToken,
-            uint256 gasPrice,
-            uint256 requiredPreFund,
-            bytes32 nodeHash
-        ) = abi.decode(context, (address, IERC20Metadata, uint256, uint256, bytes32));
+        address account = address(bytes20(context[:20]));
+        address feeToken = address(bytes20(context[20:40]));
+        bytes32 nodeHash = bytes32(context[104:]);
+        uint256 requiredPreFund = uint256(bytes32(context[72:104]));
 
         // calculate a token equivalent of the pre-calculated expenses
-        int256 tokenCost = _getPriceFromOracle(feeToken, requiredPreFund);
+        int256 tokenCost = _getPriceFromOracle(IERC20Metadata(feeToken), requiredPreFund);
         // calculate the real cost of the operation
-        uint256 realCost = ((actualGasCost + COST_OF_POST * gasPrice) * uint256(tokenCost)) /
-            requiredPreFund;
+        uint256 realCost = ((actualGasCost + COST_OF_POST * uint256(bytes32(context[40:72]))) *
+            uint256(tokenCost)) / requiredPreFund;
+
+        nodeToBalance[nodeHash] -= realCost;
 
         if (mode == PostOpMode.postOpReverted) {
             // if postOp reverted, deduct a fine from the node balance for having a to-be-reverted post-operation
@@ -285,7 +289,7 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
             debt[account][nodeHash] = Debt(
                 realCost,
                 nodeToConfig[nodeHash].verifyingSigner1,
-                feeToken
+                IERC20(feeToken)
             );
             return;
         } else {
@@ -293,11 +297,9 @@ contract UsernamesPaymaster is FIFSRegistrar, BasePaymaster, Guard {
             account.handleTokenTransfer(
                 nodeToConfig[nodeHash].verifyingSigner1,
                 realCost,
-                feeToken
+                IERC20(feeToken)
             );
         }
-
-        nodeToBalance[nodeHash] -= realCost;
     }
 
     ///

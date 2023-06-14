@@ -24,12 +24,14 @@ post_install :; @rm .gitmodules
 # Update Dependencies
 update:; @forge update
 
+update-ens :; @forge update lib/ens-contracts
+
 build-inner :; @make update-ens build
 
 # Build the project
 build:; @forge build --build-info --sizes
 
-test :; @forge test --gas-report -vv
+test :; @forge test --gas-report -vvv
 
 coverage :; @forge coverage -vv
 
@@ -50,4 +52,4 @@ deploy :; @forge script script/${contract}.s.sol:Deploy${contract}Script --rpc-u
 # Deploy for legacy
 deploy-legacy :; @forge script script/${contract}.s.sol:Deploy${contract}Script --rpc-url ${$(CHAIN)_RPC_URL}  --private-key ${PRIVATE_KEY} --legacy --broadcast -vvv
 
-update-ens :; @forge update lib/ens-contracts
+verify-sourcify :; forge verify-contract ${address} ${contract} --watch --verifier-url ${$(chain)_SCAN_URL} --verifier sourcify --force

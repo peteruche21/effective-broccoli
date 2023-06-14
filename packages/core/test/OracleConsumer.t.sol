@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
-import {MockV3Aggregator} from "mocks/MocksAndContracts.t.sol";
+import {MockV3Aggregator} from "mocks/MocksAndContracts.sol";
 import {PriceFeedConsumer} from "@usernames/utils/OracleConsumer.sol";
 import {ERC20Test, IERC20} from "@usernames/tokens/ERC20.sol";
 

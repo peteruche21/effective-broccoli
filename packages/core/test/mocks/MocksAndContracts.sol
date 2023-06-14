@@ -35,6 +35,13 @@ contract TestContract is Test {
     function revertWithMessage() external pure {
         revert("revertWithMessage");
     }
+
+    function checkPrice(
+        string memory marketPair
+    ) external view returns (int256 price, uint256 timestamp) {
+        (marketPair);
+        return (99876897, block.timestamp);
+    }
 }
 
 /**
